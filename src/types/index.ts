@@ -29,6 +29,15 @@ export interface FiiData {
   property_reference_date: string
 }
 
+export interface FiiMarketData {
+  ticker: string
+  price: number
+  pvp: number
+  dy: number
+  liquidity: number
+  lastUpdate: string
+}
+
 export interface FiiHolding {
   id: string
   nome: string
