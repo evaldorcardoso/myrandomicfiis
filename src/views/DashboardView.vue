@@ -82,14 +82,15 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref, onBeforeUnmount, h, defineComponent } from 'vue'
+import { computed, onMounted, ref, onBeforeUnmount, defineAsyncComponent, h, defineComponent } from 'vue'
 import { usePortfolioStore } from '@/stores/portfolio'
 import StatCard from '@/components/StatCard.vue'
 import SkeletonCard from '@/components/SkeletonCard.vue'
-import AllocationPieChart from '@/components/charts/AllocationPieChart.vue'
 import TopFiisList from '@/components/TopFiisList.vue'
 import ErrorState from '@/components/ErrorState.vue'
 import EmptyState from '@/components/EmptyState.vue'
+
+const AllocationPieChart = defineAsyncComponent(() => import('@/components/charts/AllocationPieChart.vue'))
 
 const store = usePortfolioStore()
 

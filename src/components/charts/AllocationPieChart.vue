@@ -1,5 +1,5 @@
 <template>
-  <ChartWrapper title="Alocação por Setor">
+  <ChartWrapper title="Alocação por Setor" :loading="loading">
     <div v-if="hasData" class="flex flex-col sm:flex-row items-center gap-4">
       <apexchart
         type="donut"
@@ -22,11 +22,12 @@ import ChartWrapper from './ChartWrapper.vue'
 
 const props = defineProps<{
   data: SegmentAllocation[]
+  loading?: boolean
 }>()
 
 const hasData = computed(() => props.data.length > 0 && props.data.some(d => d.percentage > 0))
 
-const colors = ['#415a77', '#778da9', '#0d1b2a', '#1b263b', '#e0e1dd', '#5a7a9e', '#2a3f5a']
+const colors = ['#415a77', '#778da9', '#0d1b2a', '#1b263b', '#e0e1dd', '#5a7a9e', '#2a3f5a', '#3d5670']
 
 const series = computed(() => props.data.map(d => Number(d.percentage.toFixed(1))))
 
@@ -70,7 +71,15 @@ const chartOptions = computed(() => ({
   tooltip: {
     theme: 'dark' as const,
     y: {
-      formatter: (val: number) => `${val.toFixed(1)}%`,
+      formatter: (_val: number, { seriesIndex }: { seriesIndex: number }) => {
+        const d = props.data[seriesIndex]
+        if (!d) return ''
+        const diff = d.targetPercentage - d.percentage
+        const signal = diff > 0 ? '+' : ''
+        return `<span class="text-[#e0e1dd]">${d.percentage.toFixed(1)}%</span><br/>
+                <span class="text-[#778da9] text-xs">Alvo: ${d.targetPercentage.toFixed(1)}%</span><br/>
+                <span class="${diff >= 0 ? 'text-green-400' : 'text-red-400'} text-xs">${signal}${diff.toFixed(1)}%</span>`
+      },
     },
   },
   responsive: [
