@@ -1,7 +1,7 @@
 import type { FiiData } from '../types'
 import { getMockFii, getAllMockFiis } from './__mocks__'
 
-const API_BASE = 'https://api.usebolsai.com/api/v1/fiis'
+const API_BASE = '/api/bolsai'
 const TIMEOUT_MS = 10000
 const MAX_RETRIES = 2
 const CACHE_TTL_MS = 5 * 60 * 1000
@@ -12,10 +12,6 @@ interface CacheEntry {
 }
 
 const cache = new Map<string, CacheEntry>()
-
-function hasApiKey(): boolean {
-  return !!import.meta.env.VITE_BOLSAI_API_KEY
-}
 
 function getCached(ticker: string): FiiData | undefined {
   const entry = cache.get(ticker.toUpperCase())
@@ -31,11 +27,11 @@ function setCache(ticker: string, data: FiiData): void {
   cache.set(ticker.toUpperCase(), { data, timestamp: Date.now() })
 }
 
-async function fetchWithTimeout(url: string, options: RequestInit, timeoutMs: number): Promise<Response> {
+async function fetchWithTimeout(url: string, timeoutMs: number): Promise<Response> {
   const controller = new AbortController()
   const timer = setTimeout(() => controller.abort(), timeoutMs)
   try {
-    return await fetch(url, { ...options, signal: controller.signal })
+    return await fetch(url, { signal: controller.signal })
   } finally {
     clearTimeout(timer)
   }
@@ -43,11 +39,10 @@ async function fetchWithTimeout(url: string, options: RequestInit, timeoutMs: nu
 
 async function fetchFiiWithRetry(ticker: string): Promise<FiiData> {
   const url = `${API_BASE}/${ticker}`
-  const headers = { 'X-API-Key': import.meta.env.VITE_BOLSAI_API_KEY as string }
 
   for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
     try {
-      const response = await fetchWithTimeout(url, { headers }, TIMEOUT_MS)
+      const response = await fetchWithTimeout(url, TIMEOUT_MS)
       if (!response.ok) {
         throw new Error(`Bolsai API error: ${response.status} ${response.statusText}`)
       }
@@ -69,24 +64,19 @@ export async function fetchFiiData(ticker: string): Promise<FiiData> {
   const cached = getCached(normalized)
   if (cached) return cached
 
-  if (!hasApiKey()) {
+  try {
+    const data = await fetchFiiWithRetry(normalized)
+    setCache(normalized, data)
+    return data
+  } catch {
     const mock = getMockFii(normalized)
-    if (!mock) throw new Error(`FII ${normalized} not found in mock data`)
-    return mock
+    if (mock) return mock
+    throw new Error(`FII ${normalized} not found`)
   }
-
-  const data = await fetchFiiWithRetry(normalized)
-  setCache(normalized, data)
-  return data
 }
 
 export async function fetchMultipleFiis(tickers: string[]): Promise<Map<string, FiiData>> {
   if (tickers.length === 0) return new Map()
-
-  if (!hasApiKey()) {
-    const results = getAllMockFiis().filter((f) => tickers.map(t => t.toUpperCase()).includes(f.ticker))
-    return new Map(results.map((f) => [f.ticker, f]))
-  }
 
   const results = await Promise.allSettled(tickers.map((t) => fetchFiiData(t)))
   const map = new Map<string, FiiData>()
@@ -94,6 +84,10 @@ export async function fetchMultipleFiis(tickers: string[]): Promise<Map<string, 
     if (result.status === 'fulfilled') {
       map.set(result.value.ticker, result.value)
     }
+  }
+  if (map.size === 0) {
+    const allMock = getAllMockFiis().filter((f) => tickers.map(t => t.toUpperCase()).includes(f.ticker))
+    return new Map(allMock.map((f) => [f.ticker, f]))
   }
   return map
 }
