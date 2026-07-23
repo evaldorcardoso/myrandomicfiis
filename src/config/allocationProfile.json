@@ -1,0 +1,11 @@
+{
+  "name": "Conservador",
+  "segments": {
+    "Logística": 15,
+    "Papel": 30,
+    "Shopping": 15,
+    "Lajes": 15,
+    "Varejo/renda urbana": 15,
+    "Misto": 10
+  }
+}
