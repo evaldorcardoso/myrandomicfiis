@@ -24,6 +24,7 @@ export interface NotionPageResponse {
     number?: number
     select?: { name: string }
     formula?: { number?: number; type: string }
+    rollup?: { type: string; number?: number; function?: string }
     [key: string]: unknown
   }>
   [key: string]: unknown
@@ -143,12 +144,22 @@ function extractNumber(
   if (!prop) return 0
   if (prop.type === 'number') return prop.number ?? 0
   if (prop.type === 'formula') return prop.formula?.number ?? 0
+  if (prop.type === 'rollup' && prop.rollup?.type === 'number') return prop.rollup?.number ?? 0
   return 0
 }
 
 export function extractFiiList(response: NotionQueryResponse): FiiHolding[] {
   return response.results.map((page) => {
     const props = page.properties
+
+    if (response.results.indexOf(page) === 0) {
+      console.log('[DEBUG] Notion props keys:', Object.keys(props))
+      console.log('[DEBUG] Qtd prop:', structuredClone(props['Qtd']))
+      console.log('[DEBUG] Total prop:', structuredClone(props['Total']))
+      console.log('[DEBUG] Percentual prop:', structuredClone(props['Percentual']))
+      console.log('[DEBUG] Total Fiis prop:', structuredClone(props['Total Fiis']))
+      console.log('[DEBUG] Tipo prop:', structuredClone(props['Tipo']))
+    }
 
     return {
       id: page.id,
