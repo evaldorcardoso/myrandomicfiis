@@ -59,7 +59,16 @@ Shadow Reduction
 
 ## Stack Tecnológica
 
-- **Vue 3** (Composition API) | **TypeScript** | **Vite** | **Tailwind CSS v4** | **Pinia v3** | **Vue Router v4** | **Axios** | **Vercel**
+- **Vue 3** (Composition API) | **TypeScript** | **Vite** | **Tailwind CSS v4** | **Pinia v3** | **Vue Router v4** | **Axios** | **Vercel** | **PWA** (vite-plugin-pwa w/ Workbox)
+
+## PWA
+
+- `vite-plugin-pwa` configurado em `vite.config.ts` com `generateSW` mode
+- Manifest: `name`, `short_name`, `description`, `theme_color: #0d1b2a`, `display: standalone`
+- Cache: `NetworkFirst` para `/api/`, `CacheFirst` para assets estáticos
+- Offline: navegação cai em `/offline.html`
+- Ícones: `public/icons/192x192.png`, `512x512.png`, `favicon.ico`, `apple-touch-icon.png`
+- Regenerar ícones: `node scripts/generate-pwa-icons.mjs`
 
 ## Estrutura de Diretórios
 
