@@ -1,5 +1,5 @@
 import type { FiiHolding } from '../types'
-import { getAllFiis } from './bolsai'
+import { fetchMultipleFiis } from './bolsai'
 
 const PROXY_BASE = '/api/notion-proxy'
 const PAGE_BASE = '/api/notion-page'
@@ -166,11 +166,10 @@ export async function enrichWithPrices(
   holdings: FiiHolding[]
 ): Promise<FiiHolding[]> {
   const tickers = holdings.map((h) => h.nome)
-  const fiis = await getAllFiis(tickers)
-  const priceMap = new Map(fiis.map((f) => [f.ticker, f.close_price]))
+  const fiis = await fetchMultipleFiis(tickers)
 
   return holdings.map((h) => ({
     ...h,
-    precoAtual: priceMap.get(h.nome) ?? undefined,
+    precoAtual: fiis.get(h.nome.toUpperCase())?.close_price ?? undefined,
   }))
 }
