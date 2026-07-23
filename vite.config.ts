@@ -3,11 +3,13 @@ import vue from '@vitejs/plugin-vue'
 import tailwindcss from '@tailwindcss/vite'
 import { VitePWA } from 'vite-plugin-pwa'
 import { fileURLToPath, URL } from 'node:url'
+import VercelAPI from 'vite-plugin-vercel-api'
 
 export default defineConfig({
   plugins: [
     vue(),
     tailwindcss(),
+    VercelAPI({ apiDir: 'api' }),
     VitePWA({
       registerType: 'autoUpdate',
       includeAssets: [

@@ -59,7 +59,7 @@ Shadow Reduction
 
 ## Stack Tecnológica
 
-- **Vue 3** (Composition API) | **TypeScript** | **Vite** | **Tailwind CSS v4** | **Pinia v3** | **Vue Router v4** | **Axios** | **Vercel** | **PWA** (vite-plugin-pwa w/ Workbox)
+- **Vue 3** (Composition API) | **TypeScript** | **Vite** | **Tailwind CSS v4** | **Pinia v3** | **Vue Router v4** | **Axios** | **Vercel** | **PWA** (vite-plugin-pwa w/ Workbox) | **ApexCharts** + **vue3-apexcharts**
 
 ## PWA
 
@@ -76,6 +76,8 @@ Shadow Reduction
 src/
 ├─ api/              # chamadas HTTP
 ├─ components/       # componentes Vue reutilizáveis
+│  ├─ charts/        # gráficos (ChartWrapper, AllocationPieChart, etc.)
+│  ├─ skeletons/     # loading placeholders
 ├─ config/           # configurações globais
 ├─ router/           # Vue Router config + guards
 ├─ services/         # lógica de negócio / serviços

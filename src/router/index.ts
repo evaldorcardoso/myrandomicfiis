@@ -6,7 +6,7 @@ const router = createRouter({
     {
       path: '/',
       name: 'dashboard',
-      component: () => import('@/views/HomeView.vue'),
+      component: () => import('@/views/DashboardView.vue'),
     },
     {
       path: '/ranking',
