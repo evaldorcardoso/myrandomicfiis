@@ -59,4 +59,22 @@ Shadow Reduction
 
 ## Stack Tecnológica
 
-- **Vue 3** (Composition API) | **TypeScript** | **Vite** | **Tailwind CSS** | **Axios** | **Vercel**
+- **Vue 3** (Composition API) | **TypeScript** | **Vite** | **Tailwind CSS v4** | **Pinia v3** | **Vue Router v4** | **Axios** | **Vercel**
+
+## Estrutura de Diretórios
+
+```
+src/
+├─ api/              # chamadas HTTP
+├─ components/       # componentes Vue reutilizáveis
+├─ config/           # configurações globais
+├─ router/           # Vue Router config + guards
+├─ services/         # lógica de negócio / serviços
+├─ stores/           # Pinia stores
+├─ types/            # tipos TypeScript
+├─ utils/            # funções utilitárias
+├─ views/            # páginas (views)
+├─ App.vue           # raiz (apenas <router-view />)
+├─ main.ts           # entry point
+└─ style.css         # global styles (Tailwind import)
+```
