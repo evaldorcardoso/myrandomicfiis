@@ -1,12 +1,14 @@
 {
   "name": "myrandomicfiis",
   "private": true,
-  "version": "0.1.8",
+  "version": "0.1.9",
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "vue-tsc -b && vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "dependencies": {
     "axios": "^1.7.9",
@@ -23,6 +25,7 @@
     "typescript": "~5.7.3",
     "vite": "^6.3.2",
     "vite-plugin-pwa": "^1.3.0",
+    "vitest": "^2.0.0",
     "vue-tsc": "^2.2.8"
   }
 }
