@@ -81,7 +81,7 @@ function buildPortfolioData(holdings: FiiHolding[]): PortfolioData {
   }
 }
 
-function calcTotals(holdings: FiiHolding[]): PortfolioTotals {
+export function calcTotals(holdings: FiiHolding[]): PortfolioTotals {
   const totalInvested = holdings.reduce((sum, h) => sum + h.total, 0)
   const totalCurrent = holdings.reduce((sum, h) => {
     const price = h.precoAtual ?? 0
