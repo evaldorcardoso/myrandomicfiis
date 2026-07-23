@@ -1,4 +1,4 @@
-import type { FiiData } from '../types'
+import type { FiiData, UsageData } from '../types'
 import { getMockFii, getAllMockFiis } from './__mocks__'
 import { get, set } from '@/services/cache'
 
@@ -72,4 +72,19 @@ export async function fetchMultipleFiis(tickers: string[]): Promise<Map<string, 
     return new Map(allMock.map((f) => [f.ticker, f]))
   }
   return map
+}
+
+export async function fetchUsage(): Promise<UsageData> {
+  const cacheKey = `${CACHE_PREFIX}usage`
+  const cached = get<UsageData>(cacheKey)
+  if (cached) return cached
+
+  const url = `${API_BASE}/keys/usage`
+  const response = await fetchWithTimeout(url, TIMEOUT_MS)
+  if (!response.ok) {
+    throw new Error(`Bolsai API error: ${response.status} ${response.statusText}`)
+  }
+  const data = await response.json()
+  set(cacheKey, data, CACHE_TTL_MIN)
+  return data
 }

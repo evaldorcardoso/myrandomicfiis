@@ -3,6 +3,20 @@
     <div class="max-w-5xl mx-auto">
       <h1 class="text-2xl sm:text-3xl font-bold text-[#0d1b2a] mb-6">Configurações</h1>
 
+      <div v-if="settingsStore.isUsageWarning && settingsStore.usage" class="mb-4 p-3 rounded-lg bg-yellow-900/20 border border-yellow-700 text-yellow-300 text-sm">
+        <div class="flex items-center gap-2">
+          <svg class="w-5 h-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
+            <line x1="12" y1="9" x2="12" y2="13" />
+            <line x1="12" y1="17" x2="12.01" y2="17" />
+          </svg>
+          <span>
+            Atenção: uso da API BolsAI em <strong>{{ settingsStore.usagePercent.toFixed(0) }}%</strong>
+            ({{ settingsStore.usage.used_today }} de {{ settingsStore.usage.daily_limit }} requisições hoje)
+          </span>
+        </div>
+      </div>
+
       <section class="bg-[#0d1b2a] rounded-lg p-4 sm:p-6 mb-4">
         <h2 class="text-[#778da9] text-sm font-medium uppercase tracking-wider mb-4">Perfil de Alocação</h2>
         <div class="flex items-center gap-3 mb-4">
@@ -47,6 +61,55 @@
         >
           Limpar Cache
         </button>
+      </section>
+
+      <section class="bg-[#0d1b2a] rounded-lg p-4 sm:p-6 mb-4">
+        <h2 class="text-[#778da9] text-sm font-medium uppercase tracking-wider mb-4 flex items-center gap-2">
+          <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 12.79A9 9 0 1 1 14.21 3 3 3 0 0 0 21 12.79z" />
+            <path d="M21 12.79A9 9 0 0 1 14.21 3 3 3 0 0 0 21 12.79z" />
+          </svg>
+          Uso da API BolsAI
+        </h2>
+        <div v-if="settingsStore.usageLoading" class="flex items-center gap-2 text-[#778da9] text-sm">
+          <svg class="animate-spin w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10" stroke-opacity="0.25" />
+            <path d="M12 2a10 10 0 0 1 10 10" stroke-linecap="round" />
+          </svg>
+          Carregando...
+        </div>
+        <div v-else-if="settingsStore.usageError" class="text-red-400 text-sm">
+          {{ settingsStore.usageError }}
+        </div>
+        <div v-else-if="settingsStore.usage" class="space-y-3">
+          <div class="flex items-center justify-between">
+            <span class="text-[#e0e1dd] text-sm">Plano</span>
+            <span class="text-[#778da9] font-mono text-sm capitalize">{{ settingsStore.usage.tier }}</span>
+          </div>
+          <div class="flex items-center justify-between">
+            <span class="text-[#e0e1dd] text-sm">Requisições hoje</span>
+            <span class="text-[#778da9] font-mono text-sm">{{ settingsStore.usage.used_today }}</span>
+          </div>
+          <div class="flex items-center justify-between">
+            <span class="text-[#e0e1dd] text-sm">Limite diário</span>
+            <span class="text-[#778da9] font-mono text-sm">{{ settingsStore.usage.daily_limit }}</span>
+          </div>
+          <div class="flex items-center justify-between">
+            <span class="text-[#e0e1dd] text-sm">Restantes</span>
+            <span class="text-[#778da9] font-mono text-sm">{{ settingsStore.usage.remaining }}</span>
+          </div>
+          <div class="flex items-center justify-between">
+            <span class="text-[#e0e1dd] text-sm">Uso</span>
+            <span class="text-[#778da9] font-mono text-sm">{{ settingsStore.usagePercent.toFixed(1) }}%</span>
+          </div>
+          <div class="w-full h-2 rounded-full bg-[#1b263b] overflow-hidden mt-2">
+            <div
+              class="h-full rounded-full transition-all duration-300"
+              :class="settingsStore.isUsageWarning ? 'bg-yellow-500' : 'bg-[#415a77]'"
+              :style="{ width: settingsStore.usagePercent + '%' }"
+            />
+          </div>
+        </div>
       </section>
 
       <section class="bg-[#0d1b2a] rounded-lg p-4 sm:p-6 mb-4">
@@ -239,5 +302,8 @@ async function updateMarketData() {
   }
 }
 
-onMounted(refreshCacheStats)
+onMounted(async () => {
+  refreshCacheStats()
+  await settingsStore.fetchUsage()
+})
 </script>

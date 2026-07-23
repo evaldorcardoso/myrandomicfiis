@@ -48,3 +48,10 @@ export interface FiiHolding {
   tipo: string
   precoAtual?: number
 }
+
+export interface UsageData {
+  tier: string
+  used_today: number
+  daily_limit: number
+  remaining: number
+}
