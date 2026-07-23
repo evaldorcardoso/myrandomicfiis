@@ -28,3 +28,14 @@ export interface FiiData {
   top_properties: string[]
   property_reference_date: string
 }
+
+export interface FiiHolding {
+  id: string
+  nome: string
+  qnt: number
+  total: number
+  percentual: number
+  totalFiis: number
+  tipo: string
+  precoAtual?: number
+}
