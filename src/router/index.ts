@@ -18,6 +18,11 @@ const router = createRouter({
       name: 'simulador',
       component: () => import('@/views/SimuladorView.vue'),
     },
+    {
+      path: '/config',
+      name: 'config',
+      component: () => import('@/views/SettingsView.vue'),
+    },
   ],
 })
 
