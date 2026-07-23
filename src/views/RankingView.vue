@@ -26,12 +26,13 @@
         <ErrorState :message="error" @retry="loadRanking" />
       </div>
 
-      <div v-if="loading && rankedFiis.length === 0" class="space-y-3 sm:space-y-4">
-        <SkeletonCard v-for="n in 8" :key="n" variant="fii" />
-      </div>
+      <RankingSkeleton v-if="loading && rankedFiis.length === 0" />
 
       <template v-if="!loading && showEmpty">
-        <EmptyState />
+        <EmptyState
+          title="Nenhum FII disponível"
+          message="Carregue sua carteira para ver as recomendações de ranking."
+        />
       </template>
 
       <template v-if="rankedFiis.length > 0 && !error">
@@ -179,7 +180,7 @@ import { rankRecommendations } from '@/services/recommendation'
 import type { RankedFii } from '@/services/recommendation'
 import ErrorState from '@/components/ErrorState.vue'
 import EmptyState from '@/components/EmptyState.vue'
-import SkeletonCard from '@/components/SkeletonCard.vue'
+import RankingSkeleton from '@/components/skeletons/RankingSkeleton.vue'
 
 const portfolioStore = usePortfolioStore()
 

@@ -22,9 +22,7 @@
         <ErrorState :message="store.error" @retry="handleRefresh" />
       </div>
 
-      <div v-if="store.loading && !store.raw" class="grid grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
-        <SkeletonCard v-for="n in 6" :key="n" />
-      </div>
+      <DashboardSkeleton v-if="store.loading && !store.raw" />
 
       <template v-if="!store.loading && store.raw && isEmpty">
         <EmptyState />
@@ -85,7 +83,7 @@
 import { computed, onMounted, ref, onBeforeUnmount, defineAsyncComponent, h, defineComponent } from 'vue'
 import { usePortfolioStore } from '@/stores/portfolio'
 import StatCard from '@/components/StatCard.vue'
-import SkeletonCard from '@/components/SkeletonCard.vue'
+import DashboardSkeleton from '@/components/skeletons/DashboardSkeleton.vue'
 import TopFiisList from '@/components/TopFiisList.vue'
 import ErrorState from '@/components/ErrorState.vue'
 import EmptyState from '@/components/EmptyState.vue'

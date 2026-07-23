@@ -6,9 +6,19 @@
         <path d="M12 6v6l4 2" />
       </svg>
     </div>
-    <h3 class="text-[#e0e1dd] text-lg font-semibold mb-2">Nenhum FII na carteira</h3>
+    <h3 class="text-[#e0e1dd] text-lg font-semibold mb-2">{{ title }}</h3>
     <p class="text-[#778da9] text-sm max-w-xs mx-auto">
-      Adicione seus primeiros FIIs para começar a acompanhar seu patrimônio.
+      {{ message }}
     </p>
   </div>
 </template>
+
+<script setup lang="ts">
+withDefaults(defineProps<{
+  title?: string
+  message?: string
+}>(), {
+  title: 'Nenhum FII na carteira',
+  message: 'Adicione seus primeiros FIIs para começar a acompanhar seu patrimônio.',
+})
+</script>

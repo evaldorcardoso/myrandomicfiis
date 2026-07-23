@@ -7,12 +7,13 @@
         <ErrorState :message="error" @retry="loadData" />
       </div>
 
-      <div v-if="loading && rankedFiis.length === 0 && !error" class="space-y-3 sm:space-y-4">
-        <SkeletonCard v-for="n in 3" :key="n" />
-      </div>
+      <SimuladorSkeleton v-if="loading && rankedFiis.length === 0 && !error" />
 
       <template v-if="!loading && showEmpty && !error">
-        <EmptyState />
+        <EmptyState
+          title="Nenhum FII disponível"
+          message="Carregue sua carteira para usar o simulador de aporte."
+        />
       </template>
 
       <template v-if="rankedFiis.length > 0 || (loading && rankedFiis.length > 0)">
@@ -120,7 +121,7 @@ import { rankRecommendations, simulateAporte } from '@/services/recommendation'
 import type { RankedFii, SimulateAporteResult } from '@/services/recommendation'
 import ErrorState from '@/components/ErrorState.vue'
 import EmptyState from '@/components/EmptyState.vue'
-import SkeletonCard from '@/components/SkeletonCard.vue'
+import SimuladorSkeleton from '@/components/skeletons/SimuladorSkeleton.vue'
 
 const portfolioStore = usePortfolioStore()
 
