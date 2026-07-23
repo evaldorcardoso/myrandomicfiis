@@ -1,31 +1,13 @@
 import type { FiiData } from '../types'
 import { getMockFii, getAllMockFiis } from './__mocks__'
+import { get, set } from '@/services/cache'
 
 const API_BASE = '/api/bolsai'
 const TIMEOUT_MS = 10000
 const MAX_RETRIES = 2
-const CACHE_TTL_MS = 5 * 60 * 1000
+const CACHE_TTL_MIN = 360
 
-interface CacheEntry {
-  data: FiiData
-  timestamp: number
-}
-
-const cache = new Map<string, CacheEntry>()
-
-function getCached(ticker: string): FiiData | undefined {
-  const entry = cache.get(ticker.toUpperCase())
-  if (!entry) return undefined
-  if (Date.now() - entry.timestamp > CACHE_TTL_MS) {
-    cache.delete(ticker.toUpperCase())
-    return undefined
-  }
-  return entry.data
-}
-
-function setCache(ticker: string, data: FiiData): void {
-  cache.set(ticker.toUpperCase(), { data, timestamp: Date.now() })
-}
+const CACHE_PREFIX = 'bolsai:'
 
 async function fetchWithTimeout(url: string, timeoutMs: number): Promise<Response> {
   const controller = new AbortController()
@@ -61,12 +43,12 @@ async function fetchFiiWithRetry(ticker: string): Promise<FiiData> {
 
 export async function fetchFiiData(ticker: string): Promise<FiiData> {
   const normalized = ticker.toUpperCase()
-  const cached = getCached(normalized)
+  const cached = get<FiiData>(CACHE_PREFIX + normalized)
   if (cached) return cached
 
   try {
     const data = await fetchFiiWithRetry(normalized)
-    setCache(normalized, data)
+    set(CACHE_PREFIX + normalized, data, CACHE_TTL_MIN)
     return data
   } catch {
     const mock = getMockFii(normalized)

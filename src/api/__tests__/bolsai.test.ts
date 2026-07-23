@@ -4,6 +4,7 @@ import { fetchFiiData, fetchMultipleFiis } from '../bolsai'
 describe('bolsai API', () => {
   beforeEach(() => {
     vi.restoreAllMocks()
+    localStorage.clear()
   })
 
   describe('fetchFiiData', () => {
