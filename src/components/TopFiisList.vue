@@ -1,7 +1,7 @@
 <template>
-  <div class="rounded-lg bg-[#0d1b2a] p-4">
-    <h3 class="text-[#e0e1dd] text-base sm:text-lg font-semibold mb-4">Top FIIs</h3>
-    <ul v-if="topFiis.length" class="space-y-3">
+  <div class="rounded-lg bg-[#0d1b2a] p-4 h-full flex flex-col min-h-0">
+    <h3 class="text-[#e0e1dd] text-base sm:text-lg font-semibold mb-4 shrink-0">Top FIIs</h3>
+    <ul v-if="topFiis.length" class="space-y-3 flex-1 min-h-0">
       <li
         v-for="(fii, index) in topFiis"
         :key="fii.ticker"

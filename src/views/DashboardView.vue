@@ -1,6 +1,6 @@
 <template>
-  <main class="min-h-screen bg-[#e0e1dd] pb-24 pt-4 sm:pt-6 px-4 sm:px-6">
-    <div ref="pullRef" class="max-w-5xl mx-auto">
+  <main class="min-h-screen bg-[#e0e1dd] pb-24 pt-4 sm:pt-6 px-4 sm:px-6 flex flex-col">
+    <div ref="pullRef" class="max-w-5xl mx-auto w-full flex flex-col flex-1">
       <div class="flex items-center justify-between mb-6">
         <h1 class="text-2xl sm:text-3xl font-bold text-[#0d1b2a]">Meus FIIs</h1>
         <button
@@ -70,9 +70,9 @@
           />
         </section>
 
-        <section class="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 mb-6">
-          <AllocationPieChart :data="portfolioStore.segmentAllocation" />
-          <TopFiisList :fiis="portfolioStore.fiiAllocation" />
+        <section class="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 flex-1 auto-rows-fr">
+          <AllocationPieChart class="h-full" :data="portfolioStore.segmentAllocation" />
+          <TopFiisList class="h-full" :fiis="portfolioStore.fiiAllocation" />
         </section>
       </template>
     </div>

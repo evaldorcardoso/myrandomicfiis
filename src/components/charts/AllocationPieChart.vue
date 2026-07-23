@@ -1,12 +1,13 @@
 <template>
   <ChartWrapper title="Alocação por Setor" :loading="loading">
-    <div v-if="hasData" class="flex flex-col sm:flex-row items-center gap-4">
+    <div v-if="hasData" class="flex flex-col flex-1 min-h-0">
       <apexchart
         type="donut"
-        height="260"
+        height="100%"
         width="100%"
         :options="chartOptions"
         :series="series"
+        class="flex-1 min-h-0"
       />
     </div>
     <p v-else class="text-[#778da9] text-center py-8 text-sm">
@@ -27,7 +28,14 @@ const props = defineProps<{
 
 const hasData = computed(() => props.data.length > 0 && props.data.some(d => d.percentage > 0))
 
-const colors = ['#415a77', '#778da9', '#0d1b2a', '#1b263b', '#e0e1dd', '#5a7a9e', '#2a3f5a', '#3d5670']
+const segmentColorMap: Record<string, string> = {
+  Logística: '#390099',
+  Misto: '#9e0059',
+  Papel: '#ffbd00',
+  Shoppings: '#ff0054',
+  'Varejo/Renda Urbana': '#81c3d7',
+  'Lajes Corporativas': '#ff5400',
+}
 
 const series = computed(() => props.data.map(d => Number(d.percentage.toFixed(1))))
 
@@ -38,7 +46,7 @@ const chartOptions = computed(() => ({
     foreColor: '#778da9',
   },
   labels: props.data.map(d => d.segment),
-  colors,
+  colors: props.data.map(d => segmentColorMap[d.segment] ?? '#415a77'),
   plotOptions: {
     pie: {
       donut: {
