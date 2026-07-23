@@ -1,7 +1,8 @@
 import { ref, computed } from 'vue'
 import { defineStore } from 'pinia'
 import { loadPortfolio } from '../services/portfolio'
-import { fetchMultipleFiis } from '../api/bolsai'
+import { invalidate } from '../services/cache'
+import { useMarketStore } from './market'
 import type { FiiHolding } from '../types'
 import type { PortfolioData } from '../services/portfolio'
 
@@ -20,6 +21,11 @@ export const usePortfolioStore = defineStore('portfolio', () => {
   const fiiAllocation = computed(() => raw.value?.fiiAllocation ?? [])
   const segmentAllocation = computed(() => raw.value?.segmentAllocation ?? [])
 
+  function invalidateCache() {
+    invalidate('portfolio:holdings')
+    invalidate('portfolio:enriched')
+  }
+
   async function fetchPortfolio() {
     loading.value = true
     error.value = null
@@ -27,6 +33,14 @@ export const usePortfolioStore = defineStore('portfolio', () => {
     try {
       const data = await loadPortfolio()
       raw.value = data
+
+      const marketStore = useMarketStore()
+      const tickers = data.holdings.map((h) => h.nome)
+      const missingTickers = tickers.filter((t) => !marketStore.getMarketData(t))
+      if (missingTickers.length > 0) {
+        await marketStore.fetchMarket(tickers)
+      }
+      applyMarketPrices()
     } catch (e) {
       const message = e instanceof Error ? e.message : 'Erro ao carregar portfólio'
       error.value = message
@@ -35,29 +49,16 @@ export const usePortfolioStore = defineStore('portfolio', () => {
     }
   }
 
-  async function refreshPrices() {
+  function applyMarketPrices() {
     if (!raw.value) return
-
-    loading.value = true
-    error.value = null
-
-    try {
-      const tickers = raw.value.holdings.map((h) => h.nome)
-      const marketData = await fetchMultipleFiis(tickers)
-
-      for (const holding of raw.value.holdings) {
-        const data = marketData.get(holding.nome.toUpperCase())
-        if (data) {
-          holding.precoAtual = data.close_price
-        }
+    const marketStore = useMarketStore()
+    for (const holding of raw.value.holdings) {
+      const data = marketStore.getMarketData(holding.nome)
+      if (data) {
+        holding.precoAtual = data.price
       }
-      raw.value = { ...raw.value }
-    } catch (e) {
-      const message = e instanceof Error ? e.message : 'Erro ao atualizar preços'
-      error.value = message
-    } finally {
-      loading.value = false
     }
+    raw.value = { ...raw.value }
   }
 
   return {
@@ -74,6 +75,7 @@ export const usePortfolioStore = defineStore('portfolio', () => {
     fiiAllocation,
     segmentAllocation,
     fetchPortfolio,
-    refreshPrices,
+    invalidateCache,
+    applyMarketPrices,
   }
 })

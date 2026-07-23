@@ -5,9 +5,9 @@
         <h1 class="text-2xl sm:text-3xl font-bold text-[#0d1b2a]">Meus FIIs</h1>
         <button
           @click="handleRefresh"
-          :disabled="store.loading"
+          :disabled="portfolioStore.loading || state.step === 'portfolio' || state.step === 'market'"
           class="p-2 rounded-lg bg-[#0d1b2a] text-[#e0e1dd] transition-colors hover:bg-[#1b263b] disabled:opacity-50"
-          :class="{ 'animate-spin': store.loading }"
+          :class="{ 'animate-spin': portfolioStore.loading }"
           aria-label="Atualizar dados"
         >
           <RefreshIcon class="w-5 h-5" />
@@ -18,33 +18,33 @@
         Solte para atualizar
       </p>
 
-      <div v-if="store.error" class="mb-6">
-        <ErrorState :message="store.error" @retry="handleRefresh" />
+      <div v-if="orchestrationError" class="mb-6">
+        <ErrorState :message="orchestrationError" @retry="handleRefresh" />
       </div>
 
-      <DashboardSkeleton v-if="store.loading && !store.raw" />
+      <DashboardSkeleton v-if="(state.step === 'portfolio' || state.step === 'market') && !portfolioStore.raw" />
 
-      <template v-if="!store.loading && store.raw && isEmpty">
+      <template v-if="!portfolioStore.loading && portfolioStore.raw && isEmpty">
         <EmptyState />
       </template>
 
-      <template v-if="store.raw && !isEmpty">
+      <template v-if="portfolioStore.raw && !isEmpty">
         <section class="grid grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 mb-6">
           <StatCard
             title="Patrimônio Investido"
-            :value="store.totalInvested"
+            :value="portfolioStore.totalInvested"
             :icon="InvestedIcon"
             format="currency"
           />
           <StatCard
             title="Patrimônio Atual"
-            :value="store.totalCurrent"
+            :value="portfolioStore.totalCurrent"
             :icon="CurrentIcon"
             format="currency"
           />
           <StatCard
             title="Lucro / Prejuízo"
-            :value="store.totalProfitLoss"
+            :value="portfolioStore.totalProfitLoss"
             :icon="ProfitIcon"
             format="currency"
             :change="profitLossPercent"
@@ -52,27 +52,27 @@
           />
           <StatCard
             title="Dividend Yield"
-            :value="store.averageDY"
+            :value="portfolioStore.averageDY"
             :icon="DYIcon"
             format="percent"
           />
           <StatCard
             title="P / VP Médio"
-            :value="store.averagePVP"
+            :value="portfolioStore.averagePVP"
             :icon="PVPIcon"
             format="decimal"
           />
           <StatCard
             title="Quantidade de FIIs"
-            :value="store.fiiCount"
+            :value="portfolioStore.fiiCount"
             :icon="CountIcon"
             format="number"
           />
         </section>
 
         <section class="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 mb-6">
-          <AllocationPieChart :data="store.segmentAllocation" />
-          <TopFiisList :fiis="store.fiiAllocation" />
+          <AllocationPieChart :data="portfolioStore.segmentAllocation" />
+          <TopFiisList :fiis="portfolioStore.fiiAllocation" />
         </section>
       </template>
     </div>
@@ -82,6 +82,7 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, onBeforeUnmount, defineAsyncComponent, h, defineComponent } from 'vue'
 import { usePortfolioStore } from '@/stores/portfolio'
+import { orchestrateFullFlow, subscribe, resetOrchestrator, getOrchestratorState } from '@/services/orchestrator'
 import StatCard from '@/components/StatCard.vue'
 import DashboardSkeleton from '@/components/skeletons/DashboardSkeleton.vue'
 import TopFiisList from '@/components/TopFiisList.vue'
@@ -90,7 +91,10 @@ import EmptyState from '@/components/EmptyState.vue'
 
 const AllocationPieChart = defineAsyncComponent(() => import('@/components/charts/AllocationPieChart.vue'))
 
-const store = usePortfolioStore()
+const portfolioStore = usePortfolioStore()
+
+const state = ref(getOrchestratorState())
+const orchestrationError = computed(() => state.value.portfolioError || state.value.marketError)
 
 const pullRef = ref<HTMLElement | null>(null)
 const pullDistance = ref(0)
@@ -127,8 +131,10 @@ function onTouchEnd() {
   pulling = false
 }
 
-onMounted(() => {
-  store.fetchPortfolio()
+onMounted(async () => {
+  const unsub = subscribe((s) => { state.value = s })
+  await orchestrateFullFlow()
+  unsub()
   window.addEventListener('touchstart', onTouchStart, { passive: true })
   window.addEventListener('touchmove', onTouchMove, { passive: true })
   window.addEventListener('touchend', onTouchEnd)
@@ -138,13 +144,14 @@ onBeforeUnmount(() => {
   window.removeEventListener('touchstart', onTouchStart)
   window.removeEventListener('touchmove', onTouchMove)
   window.removeEventListener('touchend', onTouchEnd)
+  resetOrchestrator()
 })
 
-const isEmpty = computed(() => store.fiiCount === 0)
+const isEmpty = computed(() => portfolioStore.fiiCount === 0)
 
 const profitLossPercent = computed(() => {
-  if (store.totalInvested === 0) return 0
-  return (store.totalProfitLoss / store.totalInvested) * 100
+  if (portfolioStore.totalInvested === 0) return 0
+  return (portfolioStore.totalProfitLoss / portfolioStore.totalInvested) * 100
 })
 
 const profitLossLabel = computed(() => {
@@ -154,7 +161,9 @@ const profitLossLabel = computed(() => {
 })
 
 async function handleRefresh() {
-  await store.fetchPortfolio()
+  const unsub = subscribe((s) => { state.value = s })
+  await orchestrateFullFlow(true)
+  unsub()
 }
 
 const RefreshIcon = defineComponent({
